@@ -3,6 +3,7 @@ package com.example.powerincode.bakingapp.screens.main;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.example.powerincode.bakingapp.R;
+import com.example.powerincode.bakingapp.common.SimpleIdlingResource;
 import com.example.powerincode.bakingapp.common.screen.BaseFragment;
 import com.example.powerincode.bakingapp.network.models.Recipe;
 import com.example.powerincode.bakingapp.screens.main.adapter.RecipeAdapter;
@@ -37,9 +39,18 @@ public class RecipeListFragment extends BaseFragment implements LoaderManager.Lo
     RecipeAdapter mRecipeAdapter;
 
     private ArrayList<Recipe> mRecipes;
+    private static SimpleIdlingResource mIdlingResource;
 
     public RecipeListFragment() {
         // Required empty public constructor
+    }
+
+    public static SimpleIdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+
+        return mIdlingResource;
     }
 
     @Override
@@ -96,6 +107,7 @@ public class RecipeListFragment extends BaseFragment implements LoaderManager.Lo
                     deliverResult(mRecipes);
                 } else {
                     forceLoad();
+                    getIdlingResource().setIdleState(false);
                 }
             }
 
@@ -116,6 +128,7 @@ public class RecipeListFragment extends BaseFragment implements LoaderManager.Lo
     public void onLoadFinished(Loader<ArrayList<Recipe>> loader, ArrayList<Recipe> data) {
         mRecipeAdapter.swapData(data);
         mRecipesLoading.setVisibility(View.INVISIBLE);
+        mIdlingResource.setIdleState(true);
     }
 
     @Override
