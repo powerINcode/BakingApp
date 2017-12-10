@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import com.example.powerincode.bakingapp.R;
 import com.example.powerincode.bakingapp.common.screen.BaseActivity;
 import com.example.powerincode.bakingapp.network.models.Recipe;
+import com.example.powerincode.bakingapp.widgets.RecipeWidgetService;
 
 
 public class RecipeDetailActivity extends BaseActivity {
@@ -46,6 +47,8 @@ public class RecipeDetailActivity extends BaseActivity {
             } else {
                 mFragment = attachFragmentToDefault(RecipeDetailTabletFragment.getFragment(recipe, mStepPosition));
             }
+
+            RecipeWidgetService.startUpdateRecipeService(this, recipe);
         }
     }
 

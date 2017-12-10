@@ -12,4 +12,7 @@
     <string name="next_step">Next step</string>
     <string name="back_to_start">Back to start</string>
     <string name="next_step_full_screen">next step</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="ingredient_widget_description">There will be ingredients for your recipe</string>
 </resources>
