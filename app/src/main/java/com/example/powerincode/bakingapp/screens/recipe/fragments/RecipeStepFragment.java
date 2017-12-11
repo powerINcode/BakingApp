@@ -1,9 +1,7 @@
 package com.example.powerincode.bakingapp.screens.recipe.fragments;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +10,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.powerincode.bakingapp.R;
-import com.example.powerincode.bakingapp.common.screen.BaseActivity;
 import com.example.powerincode.bakingapp.common.screen.BaseFragment;
+import com.example.powerincode.bakingapp.common.view.ImageLoader;
 import com.example.powerincode.bakingapp.network.models.Step;
 import com.example.powerincode.bakingapp.utils.PlayerUtil;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -33,9 +30,10 @@ import butterknife.BindView;
  * Enjoy ;)
  */
 
-public class RecipeStepFragment extends BaseFragment {
+public class RecipeStepFragment extends BaseFragment implements Player.EventListener {
     public static final String EXTRA_RECIPE_STEP = "EXTRA_RECIPE_STEP_INDEX";
     public static final String BUNDLE_PLAY_POSITION = "BUNDLE_PLAY_POSITION";
+    public static final String BUNDLE_IS_PLAY_WHEN_READY = "BUNDLE_IS_PLAY_WHEN_READY";
 
     public static RecipeStepFragment getFragment(Step step) {
         Bundle bundle = new Bundle();
@@ -52,6 +50,9 @@ public class RecipeStepFragment extends BaseFragment {
 
     @BindView(R.id.fl_video)
     FrameLayout mVideoContainer;
+
+    @BindView(R.id.il_thumbnail)
+    ImageLoader mThumbnailLoader;
 
     @BindView(R.id.tv_video_unavailavle)
     TextView mVideoUnavailableTextView;
@@ -70,11 +71,8 @@ public class RecipeStepFragment extends BaseFragment {
     private SimpleExoPlayer mPlayer;
     private PlayerUtil playerUtil = PlayerUtil.shared;
     private long mLastSeekPosition;
+    private boolean mIsPlayWhenReady = true;
     private Player.EventListener mPlayerEventListener;
-
-    public Step getStep() {
-        return mStep;
-    }
 
     @Override
     protected int getFragmentId() {
@@ -91,11 +89,21 @@ public class RecipeStepFragment extends BaseFragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        releasePlayer();
+    }
+
+    @Override
     public void onResume() {
-        setFullScreenMode(mStep != null &&
-                !mStep.videoURL.isEmpty() &&
-                isOrientationLandscape());
         super.onResume();
+
+        if (mStep != null) {
+            configurePlayer(mStep.videoURL);
+            setFullScreenMode(mStep != null &&
+                    !mStep.videoURL.isEmpty() &&
+                    isOrientationLandscape());
+        }
     }
 
     @Override
@@ -111,17 +119,19 @@ public class RecipeStepFragment extends BaseFragment {
                     mVideoUnavailableTextView.setVisibility(View.GONE);
                     mSimpleExoPlayerView.setVisibility(View.VISIBLE);
 
-                    configurePlayer(mStep.videoURL);
-
                     if (savedInstanceState != null) {
                         mLastSeekPosition = savedInstanceState.getLong(BUNDLE_PLAY_POSITION);
+                        mIsPlayWhenReady = savedInstanceState.getBoolean(BUNDLE_IS_PLAY_WHEN_READY);
 
                     }
 
-                    mPlayer.seekTo(mLastSeekPosition);
                 } else {
                     mVideoUnavailableTextView.setVisibility(View.VISIBLE);
                     mSimpleExoPlayerView.setVisibility(View.GONE);
+                }
+
+                if (!TextUtils.isEmpty(mStep.thumbnailURL)) {
+                    mThumbnailLoader.init(mStep.thumbnailURL);
                 }
 
                 mShortDescriptionTextView.setText(mStep.shortDescription);
@@ -135,16 +145,14 @@ public class RecipeStepFragment extends BaseFragment {
         if (mPlayer != null) {
             outState.putLong(BUNDLE_PLAY_POSITION, mPlayer.getCurrentPosition());
         }
+
+        outState.putBoolean(BUNDLE_IS_PLAY_WHEN_READY, mIsPlayWhenReady);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onDestroy() {
-        if (mPlayer != null) {
-            mPlayer.release();
-            mPlayer = null;
-        }
-
+        releasePlayer();
         super.onDestroy();
     }
 
@@ -161,13 +169,25 @@ public class RecipeStepFragment extends BaseFragment {
     private void configurePlayer(String url) {
         mPlayer = playerUtil.getPlayer(getContext());
         mSimpleExoPlayerView.setPlayer(mPlayer);
-        // Prepare the player with the source.
-        mPlayer.prepare(playerUtil.getMediaSource(getContext(), url));
-
         setFullScreenMode(isOrientationLandscape());
 
         if (mPlayerEventListener != null) {
             mPlayer.addListener(mPlayerEventListener);
+        }
+
+        mPlayer.addListener(this);
+
+        if (mSimpleExoPlayerView != null && url != null && !url.isEmpty()) {
+            mPlayer.prepare(playerUtil.getMediaSource(getContext(), url));
+        }
+
+        mPlayer.seekTo(mLastSeekPosition);
+    }
+
+    private void releasePlayer() {
+        if (mPlayer != null) {
+            mPlayer.release();
+            mPlayer = null;
         }
     }
 
@@ -197,7 +217,57 @@ public class RecipeStepFragment extends BaseFragment {
                 reattachPlayerView(mVideoContainer);
             }
 
-            mPlayer.setPlayWhenReady(true);
+            mPlayer.setPlayWhenReady(mIsPlayWhenReady);
         }
+    }
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        mIsPlayWhenReady = playWhenReady;
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
+
+    }
+
+    @Override
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity(int reason) {
+
+    }
+
+    @Override
+    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+    }
+
+    @Override
+    public void onSeekProcessed() {
+
     }
 }

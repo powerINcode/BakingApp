@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import com.example.powerincode.bakingapp.R;
 import com.example.powerincode.bakingapp.common.screen.BaseFragment;
@@ -22,6 +23,7 @@ import butterknife.BindView;
 public class RecipeMenuFragment extends BaseFragment {
     public static final String EXTRA_RECIPE = "EXTRA_RECIPE";
     public static final String BUNDLE_SELECTED_ITEM_INDEX = "BUNDLE_SELECTED_ITEM_INDEX";
+    public static final String BUNDLE_SCROLL_OFFSET = "BUNDLE_SCROLL_OFFSET";
 
     public interface OnMenuTappedListener {
         void onTapped(int menuIndex);
@@ -37,14 +39,16 @@ public class RecipeMenuFragment extends BaseFragment {
         return fragment;
     }
 
-    private int mSelectedPosition;
-    ArrayList<GroupBlock> mGroupBlocks = new ArrayList<>();
+    @BindView(R.id.sv_menu_scroll)
+    ScrollView mRootScrollView;
 
     @BindView(R.id.ll_recipe_menu)
     LinearLayout mMenuContainer;
 
     private Recipe mRecipe;
     private OnMenuTappedListener mEventListener;
+    private int mSelectedPosition;
+    private ArrayList<GroupBlock> mGroupBlocks = new ArrayList<>();
 
     @Override
     protected int getFragmentId() {
@@ -83,12 +87,14 @@ public class RecipeMenuFragment extends BaseFragment {
 
         if (savedInstanceState != null) {
             selectMenu(savedInstanceState.getInt(BUNDLE_SELECTED_ITEM_INDEX));
+            mRootScrollView.setScrollY(savedInstanceState.getInt(BUNDLE_SCROLL_OFFSET));
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(BUNDLE_SELECTED_ITEM_INDEX, mSelectedPosition);
+        outState.putInt(BUNDLE_SCROLL_OFFSET, mRootScrollView.getScrollY());
         super.onSaveInstanceState(outState);
     }
 

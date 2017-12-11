@@ -6,6 +6,7 @@
     tools:context="com.example.powerincode.bakingapp.screens.recipe.fragments.RecipeDetailFragment">
 
     <ScrollView
+        android:id="@+id/sv_menu_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
