@@ -28,36 +28,36 @@ public class IngredientsWidget extends AppWidgetProvider {
     private static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId, Recipe recipe) {
 
-        CharSequence widgetText = context.getString(R.string.appwidget_text);
-        // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.ingredients_widget);
-        views.setTextViewText(R.id.tv_recipe_title, recipe.name);
 
-        Intent intent = RecipeDetailActivity.getIntent(context, recipe);
-        PendingIntent recipeDetailPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        views.setOnClickPendingIntent(R.id.root_container, recipeDetailPendingIntent);
+        if (recipe != null) {
+            views.setTextViewText(R.id.tv_recipe_title, recipe.name);
+            Intent intent = RecipeDetailActivity.getIntent(context, recipe);
+            PendingIntent recipeDetailPendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+            views.setOnClickPendingIntent(R.id.root_container, recipeDetailPendingIntent);
 
-        StringBuilder ingredients = new StringBuilder();
-        for (int i = 0; i < recipe.ingredients.size(); i++) {
-            Ingredient ingredient = recipe.ingredients.get(i);
+            StringBuilder ingredients = new StringBuilder();
+            for (int i = 0; i < recipe.ingredients.size(); i++) {
+                Ingredient ingredient = recipe.ingredients.get(i);
 
-            if (i != 0) {
-                ingredients.append(",\n");
+                if (i != 0) {
+                    ingredients.append(",\n");
+                }
+
+                ingredients.append(ingredient.quantity)
+                        .append(" ")
+                        .append(ingredient.measure)
+                        .append(" ")
+                        .append(context.getString(R.string.of))
+                        .append(" ")
+                        .append(ingredient.ingredient);
             }
 
-            ingredients.append(ingredient.quantity)
-                    .append(" ")
-                    .append(ingredient.measure)
-                    .append(" ")
-                    .append(context.getString(R.string.of))
-                    .append(" ")
-                    .append(ingredient.ingredient);
+            views.setTextViewText(R.id.tv_recipe_ingredients, ingredients.toString());
+
+            // Instruct the widget manager to update the widget
+            appWidgetManager.updateAppWidget(appWidgetId, views);
         }
-
-        views.setTextViewText(R.id.tv_recipe_ingredients, ingredients.toString());
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
     @Override

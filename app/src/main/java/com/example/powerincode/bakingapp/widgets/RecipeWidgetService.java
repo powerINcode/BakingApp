@@ -48,12 +48,6 @@ public class RecipeWidgetService extends IntentService {
     }
 
     public void updateRecipe(@Nullable Recipe recipe) {
-        if (recipe == null) {
-            recipe = new Recipe();
-            recipe.name = "";
-            recipe.ingredients = new ArrayList<>();
-        }
-
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] widgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, IngredientsWidget.class));
         IngredientsWidget.updateRecipe(this, appWidgetManager, widgetIds, recipe);

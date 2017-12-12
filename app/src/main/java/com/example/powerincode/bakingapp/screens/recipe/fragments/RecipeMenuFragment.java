@@ -94,7 +94,10 @@ public class RecipeMenuFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt(BUNDLE_SELECTED_ITEM_INDEX, mSelectedPosition);
-        outState.putInt(BUNDLE_SCROLL_OFFSET, mRootScrollView.getScrollY());
+        if (mRootScrollView != null) {
+            outState.putInt(BUNDLE_SCROLL_OFFSET, mRootScrollView.getScrollY());
+        }
+
         super.onSaveInstanceState(outState);
     }
 

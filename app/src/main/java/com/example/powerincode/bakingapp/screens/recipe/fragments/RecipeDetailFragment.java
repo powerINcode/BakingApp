@@ -49,33 +49,35 @@ public class RecipeDetailFragment extends BaseFragment {
         if (getArguments() != null) {
             mRecipe = getArguments().getParcelable(EXTRA_RECIPE);
 
-            if (!TextUtils.isEmpty(mRecipe.image)) {
-                mRecipeImageLoader.init(mRecipe.image);
-            } else {
-                mRecipeImageLoader.init(R.drawable.ic_recipe);
-            }
-
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < mRecipe.ingredients.size(); i++) {
-                Ingredient ingredient = mRecipe.ingredients.get(i);
-
-                if (i != 0) {
-                    sb.append(",\n");
+            if (mRecipe != null) {
+                if (!TextUtils.isEmpty(mRecipe.image)) {
+                    mRecipeImageLoader.init(mRecipe.image);
+                } else {
+                    mRecipeImageLoader.init(R.drawable.ic_recipe);
                 }
 
-                sb.append(String.valueOf(i + 1))
-                        .append(") ")
-                        .append(ingredient.quantity)
-                        .append(" ")
-                        .append(ingredient.measure)
-                        .append(" ")
-                        .append(getString(R.string.of))
-                        .append(" ")
-                        .append(ingredient.ingredient);
-            }
+                StringBuilder sb = new StringBuilder();
 
-            mIngredientsTextView.setText(sb.toString());
+                for (int i = 0; i < mRecipe.ingredients.size(); i++) {
+                    Ingredient ingredient = mRecipe.ingredients.get(i);
+
+                    if (i != 0) {
+                        sb.append(",\n");
+                    }
+
+                    sb.append(String.valueOf(i + 1))
+                            .append(") ")
+                            .append(ingredient.quantity)
+                            .append(" ")
+                            .append(ingredient.measure)
+                            .append(" ")
+                            .append(getString(R.string.of))
+                            .append(" ")
+                            .append(ingredient.ingredient);
+                }
+
+                mIngredientsTextView.setText(sb.toString());
+            }
         }
 
     }

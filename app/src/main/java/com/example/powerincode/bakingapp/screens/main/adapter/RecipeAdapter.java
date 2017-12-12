@@ -2,6 +2,7 @@ package com.example.powerincode.bakingapp.screens.main.adapter;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,7 +66,7 @@ public class RecipeAdapter extends BaseAdapter<Recipe, RecipeAdapter.RecipeViewH
             mRecipe = item;
             recipeNameTextView.setText(mRecipe.name);
 
-            if (mRecipe.image != null && !mRecipe.image.isEmpty()) {
+            if (!TextUtils.isEmpty(mRecipe.image)) {
                 mRecipeImageLoader.init(mRecipe.image);
             } else {
                 mRecipeImageLoader.init(R.drawable.ic_recipe);
